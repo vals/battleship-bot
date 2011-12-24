@@ -3,110 +3,113 @@
 import random
 import numpy as np
 
+
 class Ship():
-	"""Class representing a ship.
-	"""
-	def __init__(self, size):
-		self.size = size
-		self.hull = set([])
+    """Class representing a ship.
+    """
+    def __init__(self, size):
+        self.size = size
+        self.hull = set([])
 
-	def place(self, illegal):
-		"""Randomly place the ship.
-		The argument illiegal is a set of points in the grid where 
-		the ship is not allowed	to go.
-		"""
-		placed = False
-		while not placed:
-			wake = set([])
-			self.hull = set([])
-			bow = np.array([np.random.randint(10), np.random.randint(10)])
+    def place(self, illegal):
+        """Randomly place the ship.
+        The argument illiegal is a set of points in the grid where
+        the ship is not allowed    to go.
+        """
+        placed = False
+        while not placed:
+            wake = set([])
+            self.hull = set([])
+            bow = np.array([np.random.randint(10), np.random.randint(10)])
 
-			try:
-				if tuple(bow) in illegal: 
-					raise Exception("Ship cannot go there")
+            try:
+                if tuple(bow) in illegal:
+                    raise Exception("Ship cannot go there")
 
-				axis = random.choice([np.array([1,0]), np.array([0,1])])
-				# direction = random.choice([1,-1])
-				direction = 1
+                axis = random.choice([np.array([1, 0]), np.array([0, 1])])
+                # direction = random.choice([1,-1])
+                direction = 1
 
-				wake.add(tuple(bow + direction*(1 - axis)))
-				wake.add(tuple(bow - direction*(1 - axis)))
+                wake.add(tuple(bow + direction * (1 - axis)))
+                wake.add(tuple(bow - direction * (1 - axis)))
 
-				wake.add(tuple(bow - direction*axis + (1 - axis)))
-				wake.add(tuple(bow - direction*axis))
-				wake.add(tuple(bow - direction*axis - (1 - axis)))
+                wake.add(tuple(bow - direction * axis + (1 - axis)))
+                wake.add(tuple(bow - direction * axis))
+                wake.add(tuple(bow - direction * axis - (1 - axis)))
 
-				self.hull.add(tuple(bow))
+                self.hull.add(tuple(bow))
 
-				for part in range(1, self.size):
-					square = bow + part*direction*axis
-					
-					if np.any(square > 9) or np.any(square <= 0) or tuple(square) in illegal:
-						raise Exception("Ship cannot go there")
-					
-					wake.add(tuple(square + direction*(1 - axis)))
-					wake.add(tuple(square - direction*(1 - axis)))
+                for part in range(1, self.size):
+                    square = bow + part * direction * axis
 
-					self.hull.add(tuple(square))
+                    if np.any(square > 9) or np.any(square <= 0) or tuple(square) in illegal:
+                        raise Exception("Ship cannot go there")
 
-				wake.add(tuple(square + direction*axis + (1 - axis)))
-				wake.add(tuple(square + direction*axis))
-				wake.add(tuple(square + direction*axis - (1 - axis)))
-				
-				placed = True
+                    wake.add(tuple(square + direction * (1 - axis)))
+                    wake.add(tuple(square - direction * (1 - axis)))
 
-			except Exception as e:
-				pass
+                    self.hull.add(tuple(square))
 
-		illegal = illegal.union(wake)
-		illegal = illegal.union(self.hull)
-		return illegal
+                wake.add(tuple(square + direction * axis + (1 - axis)))
+                wake.add(tuple(square + direction * axis))
+                wake.add(tuple(square + direction * axis - (1 - axis)))
 
-	def __str__(self):
-		"""Display the ships hull on a grid represented by a
-		numpy array.
-		"""
-		board = np.ones((10,10))
-		for coord in self.hull:
-			try:
-				board[coord[0], coord[1]] = 0
-			except IndexError:
-				pass
+                placed = True
 
-		return str(board)
+            except Exception:
+                pass
+
+        illegal = illegal.union(wake)
+        illegal = illegal.union(self.hull)
+        return illegal
+
+    def __str__(self):
+        """Display the ships hull on a grid represented by a
+        numpy array.
+        """
+        board = np.ones((10, 10))
+        for coord in self.hull:
+            try:
+                board[coord[0], coord[1]] = 0
+            except IndexError:
+                pass
+
+        return str(board)
 
 
 def generate_ships(sizes):
-	"""Return a list of Ships.
-	"""
-	ships = []
-	for size in sizes:
-		ships.append(Ship(size))
-	
-	return ships
+    """Return a list of Ships.
+    """
+    ships = []
+    for size in sizes:
+        ships.append(Ship(size))
+
+    return ships
+
 
 def place_ships(ships):
-	"""Place ship on the board.
-	"""
-	illegal = set([])
-	for ship in ships:
-		illegal = ship.place(illegal)
+    """Place ship on the board.
+    """
+    illegal = set([])
+    for ship in ships:
+        illegal = ship.place(illegal)
+
 
 def print_ships(ships):
-	"""Display an array representation of the ship placements.
-	"""
-	board = np.ones((10, 10))
-	for ship in ships:
-		try:
-			for coord in ship.hull:
-				try:
-					board[coord[0], coord[1]] = 0
-				except IndexError:
-					pass
-		except AttributeError:
-			pass
-	
-	print(board)
+    """Display an array representation of the ship placements.
+    """
+    board = np.ones((10, 10))
+    for ship in ships:
+        try:
+            for coord in ship.hull:
+                try:
+                    board[coord[0], coord[1]] = 0
+                except IndexError:
+                    pass
+        except AttributeError:
+            pass
+
+    print(board)
 
 ## RUNNING ##
 
