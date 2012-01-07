@@ -42,7 +42,8 @@ class Ship():
                 for part in range(1, self.size):
                     square = bow + part * direction * axis
 
-                    if np.any(square > 9) or np.any(square <= 0) or tuple(square) in illegal:
+                    if np.any(square > 9) or np.any(square <= 0) or \
+                    tuple(square) in illegal:
                         raise Exception("Ship cannot go there")
 
                     wake.add(tuple(square + direction * (1 - axis)))
@@ -77,43 +78,55 @@ class Ship():
         return str(board)
 
 
-def generate_ships(sizes):
-    """Return a list of Ships.
+class Game(object):
+    """Models a game of battleship, contains a board on which ships are placed,
+    and methods to perform modes.
     """
-    ships = []
-    for size in sizes:
-        ships.append(Ship(size))
+    def __init__(self, size=10):
+        sizes = [5, 4, 3, 3, 2]
+        self.generate_ships(sizes)
+        self.place_ships()
 
-    return ships
+    def generate_ships(self, sizes):
+        """Return a list of Ships.
+        """
+        self.ships = []
+        for size in sizes:
+            self.ships.append(Ship(size))
+
+    def place_ships(self):
+        """Place ship on the board.
+        """
+        illegal = set([])
+        for ship in self.ships:
+            illegal = ship.place(illegal)
+
+    def print_ships(self):
+        """Display an array representation of the ship placements.
+        """
+        board = np.ones((10, 10))
+        for ship in self.ships:
+            try:
+                for coord in ship.hull:
+                    try:
+                        board[coord[0], coord[1]] = 0
+                    except IndexError:
+                        pass
+            except AttributeError:
+                pass
+
+        print(board)
 
 
-def place_ships(ships):
-    """Place ship on the board.
-    """
-    illegal = set([])
-    for ship in ships:
-        illegal = ship.place(illegal)
-
-
-def print_ships(ships):
-    """Display an array representation of the ship placements.
-    """
-    board = np.ones((10, 10))
-    for ship in ships:
-        try:
-            for coord in ship.hull:
-                try:
-                    board[coord[0], coord[1]] = 0
-                except IndexError:
-                    pass
-        except AttributeError:
-            pass
-
-    print(board)
+# class Strategy(object):
+#     """Represents a strategy used by a battleship bot to win the game by
+#     finding all the ships.
+#     """
+#     self.on_hit = lambda: None
+#     self.on_miss = lambda: None
+#     self.hits = []
+#     self.misses = []
 
 ## RUNNING ##
-
-sizes = [5, 4, 3, 3, 2]
-ships = generate_ships(sizes)
-place_ships(ships)
-print_ships(ships)
+game = Game()
+game.print_ships()
