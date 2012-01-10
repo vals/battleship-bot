@@ -160,11 +160,96 @@ class RandomStrategy(Strategy):
 
         return len(self.hits) + len(self.misses)
 
+
+class RandomGuidedStrategy(Strategy):
+    """Looks at neighbours of randomly found hits"""
+    def __init__(self, game, total=17):
+        super(RandomGuidedStrategy, self).__init__(total)
+        self.game = game
+
+    def run(self):
+        all_coords = []
+        for i in range(10):
+            for j in range(10):
+                all_coords.append((i, j))
+
+        while len(self.hits) < self.total:
+            coord = random.choice(all_coords)
+            all_coords.remove(coord)
+
+            if self.game.play(coord):
+                self.hits.append(coord)
+                n_hits = 1
+                while coord[0] < 9:
+                    coord = (coord[0] + 1, coord[1])
+                    if coord not in all_coords:
+                        break
+                    if not self.game.play(coord):
+                        self.misses.append(coord)
+                        all_coords.remove(coord)
+                        break
+                    else:
+                        self.hits.append(coord)
+                        all_coords.remove(coord)
+                        n_hits += 1
+
+                if n_hits > 1:
+                    continue
+
+                while coord[1] < 9:
+                    coord = (coord[0], coord[1] + 1)
+                    if coord not in all_coords:
+                        break
+                    if not self.game.play(coord):
+                        self.misses.append(coord)
+                        all_coords.remove(coord)
+                        break
+                    else:
+                        self.hits.append(coord)
+                        all_coords.remove(coord)
+                        n_hits += 1
+
+                if n_hits > 1:
+                    continue
+
+                while coord[0] > 0:
+                    coord = (coord[0] + 1, coord[1])
+                    if coord not in all_coords:
+                        break
+                    if not self.game.play(coord):
+                        self.misses.append(coord)
+                        all_coords.remove(coord)
+                        break
+                    else:
+                        self.hits.append(coord)
+                        all_coords.remove(coord)
+                        n_hits += 1
+
+                if n_hits > 1:
+                    continue
+
+                while coord[1] > 0:
+                    coord = (coord[0], coord[1] + 1)
+                    if coord not in all_coords:
+                        break
+                    if not self.game.play(coord):
+                        self.misses.append(coord)
+                        all_coords.remove(coord)
+                        break
+                    else:
+                        self.hits.append(coord)
+                        all_coords.remove(coord)
+                        n_hits += 1
+            else:
+                self.misses.append(coord)
+
+        return len(self.hits) + len(self.misses)
+
 ## RUNNING ##
 s = 0
 for i in range(1000):
     game = Game()
-    strategy = RandomStrategy(game)
+    strategy = RandomGuidedStrategy(game)
     s += strategy.run()
 
 print(s / 1000)
