@@ -80,10 +80,9 @@ class Ship():
 
 class Game(object):
     """Models a game of battleship, contains a board on which ships are placed,
-    and methods to perform modes.
+    and methods to perform moves.
     """
-    def __init__(self, size=10):
-        sizes = [5, 4, 3, 3, 2]
+    def __init__(self, size=10, sizes=[5, 4, 3, 3, 2]):
         self.generate_ships(sizes)
         self.place_ships()
 
@@ -117,16 +116,56 @@ class Game(object):
 
         print(board)
 
+    def play(self, coord):
+        """Play a move in the game with the coordinate as a tuple of integers.
+        Returns True if a ship is hit, False otherwise.
+        """
+        for ship in self.ships:
+            if coord in ship.hull:
+                return True
 
-# class Strategy(object):
-#     """Represents a strategy used by a battleship bot to win the game by
-#     finding all the ships.
-#     """
-#     self.on_hit = lambda: None
-#     self.on_miss = lambda: None
-#     self.hits = []
-#     self.misses = []
+        return False
+
+
+class Strategy(object):
+    """Represents a strategy used by a battleship bot to win the game by
+    finding all the ships.
+    """
+    def __init__(self, total=17):
+        self.hits = []
+        self.misses = []
+        self.total = total
+
+
+class RandomStrategy(Strategy):
+    """A silly strategy where moves are picked completely at random"""
+    def __init__(self, game, total=17):
+        super(RandomStrategy, self).__init__(total)
+        self.game = game
+
+    def run(self):
+        all_coords = []
+        for i in range(10):
+            for j in range(10):
+                all_coords.append((i, j))
+
+        while len(self.hits) < self.total:
+            coord = random.choice(all_coords)
+            all_coords.remove(coord)
+
+            if self.game.play(coord):
+                self.hits.append(coord)
+            else:
+                self.misses.append(coord)
+
+        return len(self.hits) + len(self.misses)
 
 ## RUNNING ##
-game = Game()
+s = 0
+for i in range(1000):
+    game = Game()
+    strategy = RandomStrategy(game)
+    s += strategy.run()
+
+print(s / 1000)
 game.print_ships()
